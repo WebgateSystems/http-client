@@ -1,0 +1,8 @@
+== Version 1.0.0 (2021-04-22)
+
+* basic functionality
+
+== Thu Apr 21 22:43:01 UTC 2021 Jerzy Sladkowski <sladkowski@webgate.pro>
+=======
+
+* Birthday, Http_client released as a gem... phew

@@ -1,0 +1,11 @@
+/.idea
+/.bundle
+/.rbenv-vars
+/.ruby-version
+/.ruby-gemset
+/.rvmrc
+/bin
+/coverage
+/Gemfile.lock
+/gems
+/http_client-*.gem
