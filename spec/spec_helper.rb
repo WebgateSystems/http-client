@@ -15,7 +15,6 @@ require 'rspec'
 require 'active_support'
 require 'active_support/core_ext'
 require 'faraday'
-require 'faraday_middleware'
 require 'webmock/rspec'
 
 $stderr.puts("Running Specs for Http Client Version #{WS::HttpClient::VERSION::STRING}")

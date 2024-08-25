@@ -13,11 +13,10 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files = %w[ README.md ]
 
   s.add_dependency('faraday')
-  s.add_dependency('faraday_middleware')
 
-  s.add_development_dependency('bundler', '>= 2.1.0')
+  s.add_development_dependency('bundler', '>= 2.5.17')
   s.add_development_dependency('rake', '> 0.8.7')
-  s.add_development_dependency('rspec', '~> 3.0')
+  s.add_development_dependency('rspec', '~> 3.13')
   s.add_development_dependency('rdoc')
   s.add_development_dependency('pry')
   s.add_development_dependency('webmock')

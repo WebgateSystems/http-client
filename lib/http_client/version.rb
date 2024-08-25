@@ -3,7 +3,7 @@ module WS
   module HttpClient
     module VERSION
 
-      MAJOR = 1
+      MAJOR = 2
       MINOR = 0
       PATCH = 0
       BUILD = 'edge'
