@@ -1,0 +1,88 @@
+# Gem checks. No build and no deploy.
+# A green pipeline means every job below passed.
+# GitHub copy: .github/workflows/ci.yml
+
+stages:
+  - test
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+default:
+  tags:
+    - docker-ci
+  interruptible: true
+
+variables:
+  TZ: "Europe/Warsaw"
+  BUNDLE_PATH: "$CI_PROJECT_DIR/vendor/bundle"
+  BUNDLE_FROZEN: "1"
+  BUNDLER_VERSION: "2.4.10"
+  BUNDLE_JOBS: "4"
+  BUNDLE_RETRY: "3"
+
+.ruby_setup:
+  before_script:
+    - |
+      set -eu
+      apt-get update
+      apt-get install -y --no-install-recommends \
+        build-essential \
+        git \
+        libyaml-dev \
+        pkg-config
+      rm -rf /var/lib/apt/lists/*
+      ruby --version
+      gem install bundler --version "$BUNDLER_VERSION" --no-document
+      bundle config set path "$BUNDLE_PATH"
+      bundle install --jobs "$BUNDLE_JOBS" --retry "$BUNDLE_RETRY"
+  cache:
+    key: "bundler-${RUBY_IMAGE}"
+    paths:
+      - vendor/bundle/
+    policy: pull-push
+
+.static_analysis:
+  extends: .ruby_setup
+  stage: test
+  image: ruby:4.0.6-bookworm
+  variables:
+    RUBY_IMAGE: "4.0.6-bookworm"
+
+rubocop:
+  extends: .static_analysis
+  script:
+    - bundle exec rubocop
+
+fasterer:
+  extends: .static_analysis
+  script:
+    - bundle exec fasterer
+
+bundler_audit:
+  extends: .static_analysis
+  script:
+    - bundle exec bundler-audit check --update
+
+brakeman:
+  extends: .static_analysis
+  script:
+    - bundle exec brakeman --force-scan --quiet --no-pager --exit-on-warn --exit-on-error
+
+# Ruby 3.2 and older are unsupported: the locked prism build requires 3.3.
+rspec:
+  extends: .ruby_setup
+  stage: test
+  image: ruby:${RUBY_IMAGE}
+  parallel:
+    matrix:
+      - RUBY_IMAGE:
+          - "3.3-bookworm"
+          - "3.4-bookworm"
+          - "4.0.6-bookworm"
+  script:
+    - bundle exec rspec

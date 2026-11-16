@@ -4,83 +4,104 @@ module WS
   module HttpClient
     class Connection
       AVAILABLE_HTTP_METHODS = %i[connect delete get head options patch post put trace].freeze
+      DEFAULT_READ_TIMEOUT = 5
+      DEFAULT_OPEN_TIMEOUT = 7
+      FallbackSettings = Struct.new(:faraday, keyword_init: true)
 
       def initialize(base_url, connection_options = {})
         @base_url = base_url
-        @connection = create_connection(connection_options)
         @logger = defined?(::Rails) ? Rails.logger : Logger.new
         @settings = defined?(::Settings) ? Settings : connection_settings
+        @connection = create_connection(connection_options)
       end
 
       AVAILABLE_HTTP_METHODS.each do |http_method|
         define_method(http_method) do |endpoint, body = {}, headers = {}, options = {}|
-          args = [build_url(endpoint), body, headers]
-
-          if http_method == :options
-            faraday_method = 'run_request'
-            args.unshift(:options)
-          else
-            faraday_method = http_method
-          end
-
-          @response = @connection.public_send(faraday_method, *args) do |request|
-            request.options.timeout = options[:timeout_read] || @settings.faraday.dig(:timeout, :read)
-            request.options.open_timeout = options[:timeout_open] || @settings.faraday.dig(:timeout, :read)
-          end
-
-          log_and_raise_if_necessary(options[:expected_statuses])
-
-          Response.new(body: @response.body, status: @response.status, headers: @response.headers)
+          perform(http_method, endpoint, body, headers, options)
         end
       end
 
       private
 
-      def create_connection(options)
-        faraday_options = {
-          headers: options[:headers] || {},
-          ssl: {
-            verify: options.dig(:ssl, :verify),
-            ca_file: options.dig(:ssl, :ca_file)
-          }
-        }
-        content_type = faraday_options[:headers]['Content-Type']
-        request_type = content_type && content_type.include?('urlencoded') ? :url_encoded : :json # json - default
+      def perform(http_method, endpoint, body, headers, options)
+        faraday_response = dispatch(http_method, endpoint, body, headers, options)
+        response = build_response(faraday_response)
+        log_and_raise_if_necessary(response, options[:expected_statuses])
+        response
+      rescue Faraday::TimeoutError => e
+        raise TimeoutError, e.message
+      rescue Faraday::ConnectionFailed => e
+        raise ConnectionError, e.message
+      end
 
-        Faraday.new(faraday_options) do |builder|
-          builder.use Faraday::Response::Logger, @logger
-          builder.request request_type
-          builder.response :logger, @logger
-          builder.response :json, content_type: /\bjson$/
-          builder.adapter :net_http
-        end
+      def dispatch(http_method, endpoint, body, headers, options)
+        method_name, args = faraday_invocation(http_method, endpoint, body, headers)
+        @connection.public_send(method_name, *args) { |request| assign_timeouts(request, options) }
+      end
+
+      def faraday_invocation(http_method, endpoint, body, headers)
+        args = [build_url(endpoint), body, headers]
+        return [:run_request, [:options, *args]] if http_method == :options
+
+        [http_method, args]
+      end
+
+      def assign_timeouts(request, options)
+        request.options.timeout = options[:timeout_read] || read_timeout
+        request.options.open_timeout = options[:timeout_open] || open_timeout
+      end
+
+      def build_response(faraday_response)
+        Response.new(
+          body: faraday_response.body,
+          status: faraday_response.status,
+          headers: faraday_response.headers
+        )
+      end
+
+      def create_connection(options)
+        FaradayBuilder.new(@logger, options).connection
       end
 
       def build_url(endpoint)
-        uri = URI(@base_url)
-        uri.path += endpoint
-        uri.to_s
+        Url.join(@base_url, endpoint)
       end
 
-      def log_and_raise_if_necessary(expected_statuses)
-        return if permitted_response?(expected_statuses)
+      def log_and_raise_if_necessary(response, expected_statuses)
+        return if permitted_response?(response, expected_statuses)
 
-        message = "Unexpected HTTP response #{@response.status} '#{@response.body}'"
-        @logger.error(message)
-        raise UnexpectedStatusError, message
+        @logger.error("Unexpected HTTP status: #{response.status}")
+        raise UnexpectedStatusError, response
       end
 
-      def permitted_response?(expected_statuses)
-        expected_statuses.nil? ||
-          [expected_statuses].flatten.any? { |permitted| permitted === @response.status }
+      def permitted_response?(response, expected_statuses)
+        expected_statuses.nil? || matches_status?(expected_statuses, response.status)
+      end
+
+      def matches_status?(expected_statuses, status)
+        [expected_statuses].flatten.any? { |permitted| status_allowed?(permitted, status) }
+      end
+
+      def status_allowed?(permitted, status)
+        return permitted.cover?(status) if permitted.is_a?(Range)
+
+        permitted == status
+      end
+
+      def read_timeout
+        @settings.faraday.dig(:timeout, :read) || DEFAULT_READ_TIMEOUT
+      end
+
+      def open_timeout
+        @settings.faraday.dig(:timeout, :open) || DEFAULT_OPEN_TIMEOUT
       end
 
       def connection_settings
-        OpenStruct.new(
+        FallbackSettings.new(
           faraday: {
             timeout: {
-              read: 5,
-              open: 7,
+              read: DEFAULT_READ_TIMEOUT,
+              open: DEFAULT_OPEN_TIMEOUT
             }
           }
         )

@@ -6,6 +6,9 @@
 /.rvmrc
 /bin
 /coverage
-/Gemfile.lock
+/pkg
+/spec/reports
+/tmp
+/vendor
 /gems
 /http_client-*.gem

@@ -1,0 +1,16 @@
+name: Ruby setup
+description: Install the requested Ruby, Bundler 2.4.10, and the locked gems.
+
+inputs:
+  ruby-version:
+    description: Version passed to ruby/setup-ruby, such as 4.0.6 or 3.3.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ inputs.ruby-version }}
+        bundler: "2.4.10"
+        bundler-cache: true

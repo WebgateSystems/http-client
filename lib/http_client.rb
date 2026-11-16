@@ -1,13 +1,16 @@
-# encoding: utf-8
 # frozen_string_literal: true
-module WS # :doc:
+
+module WS
   module HttpClient
     require 'faraday'
+    require 'uri'
     require 'http_client/version'
 
-    require 'http_client/connection'
     require 'http_client/logger'
+    require 'http_client/errors'
     require 'http_client/response'
-    require 'http_client/unexpected_status_error'
+    require 'http_client/url'
+    require 'http_client/faraday_builder'
+    require 'http_client/connection'
   end
 end

@@ -1,0 +1,52 @@
+plugins:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  # Oldest supported line. Keep this aligned with required_ruby_version.
+  TargetRubyVersion: 3.3
+
+Style/Documentation:
+  Enabled: false
+
+# Fasterer flags Hash#fetch with a default argument. The block form skips that work.
+Style/RedundantFetchBlock:
+  Enabled: false
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'http_client.gemspec'
+  AllowedMethods:
+    - describe
+    - context
+
+# Examples live under spec/http_client. The WS namespace is not a directory.
+RSpec/SpecFilePathFormat:
+  Enabled: false
+
+# Faraday builds the connection and the request options inside the client.
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/StubbedMock:
+  Enabled: false
+
+# Request setup is inherited by every verb group.
+RSpec/MultipleMemoizedHelpers:
+  Max: 13
+
+# Status options sit under the body group, which sits under the connection group.
+RSpec/NestedGroups:
+  Max: 6
+
+RSpec/MultipleExpectations:
+  Max: 6
+
+RSpec/ExampleLength:
+  Max: 12

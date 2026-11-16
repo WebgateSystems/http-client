@@ -1,25 +1,29 @@
+# frozen_string_literal: true
+
 require './lib/http_client/version'
 
 Gem::Specification.new do |s|
-  s.name        = "http_client"
+  s.name        = 'http_client'
   s.version     = WS::HttpClient::VERSION::STRING
-  s.author      = "Jerzy Sladkowski"
-  s.email       = "sladkowski@webgate.pro"
-  s.homepage    = "https://github.com/WebgateSystems/http-client"
-  s.description = "Lightweight http connection wrapper."
-  s.summary     = "HttpClient provide nice interface to handle http connections and errors really efficient."
-  s.license     = "MIT"
+  s.author      = 'Jerzy Sladkowski'
+  s.email       = 'sladkowski@webgate.pro'
+  s.homepage    = 'https://github.com/WebgateSystems/http-client'
+  s.summary     = 'Thin Faraday wrapper for HTTP requests, responses, and errors.'
+  s.description = 'Joins a base URL with a path, returns one response object, and raises its own ' \
+                  'errors for timeouts, connection failures, and unexpected statuses. ' \
+                  'Requires Ruby 3.3 or newer and Faraday 2.'
+  s.license     = 'MIT'
+  s.required_ruby_version = '>= 3.3.0'
+  # Oldest Ruby the locked gems install on. Keep .gitlab-ci.yml and .github/workflows/ci.yml in step.
+  s.metadata['supported_ruby_versions'] = '3.3, 3.4, 4.0'
 
-  s.extra_rdoc_files = %w[ README.md ]
+  s.metadata['homepage_uri'] = s.homepage
+  s.metadata['source_code_uri'] = 'https://github.com/WebgateSystems/http-client'
+  s.metadata['changelog_uri'] = 'https://github.com/WebgateSystems/http-client/blob/main/CHANGELOG.md'
 
-  s.add_dependency('faraday')
+  s.extra_rdoc_files = %w[README.md CHANGELOG.md]
 
-  s.add_development_dependency('bundler', '>= 2.5.17')
-  s.add_development_dependency('rake', '> 0.8.7')
-  s.add_development_dependency('rspec', '~> 3.13')
-  s.add_development_dependency('rdoc')
-  s.add_development_dependency('pry')
-  s.add_development_dependency('webmock')
+  s.add_dependency 'faraday', '>= 2.14.3', '< 3'
 
-  s.files = %w[ README.md LICENSE ] + Dir.glob("lib/**/*")
+  s.files = %w[README.md CHANGELOG.md LICENSE] + Dir.glob('lib/**/*')
 end

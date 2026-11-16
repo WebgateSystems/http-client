@@ -1,22 +1,13 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 require 'rubygems'
 require 'bundler/setup'
-
-begin
-  if RUBY_VERSION >= '2.0'
-    require 'pry'
-  elsif RUBY_VERSION >= '1.9'
-    require 'debugger'
-  else
-    require 'ruby-debug'
-  end
-rescue LoadError
-end
+require 'pry'
 
 require 'active_support'
 require 'active_support/core_ext'
 require 'faraday'
-require 'faraday_middleware'
 require 'http_client'
 
 require 'irb'

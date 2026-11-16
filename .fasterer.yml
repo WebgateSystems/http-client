@@ -1,0 +1,6 @@
+exclude_paths:
+  - 'vendor/**/*.rb'
+  - 'coverage/**/*.rb'
+  - 'logs/**/*.rb'
+  - 'tmp/**/*.rb'
+  - 'pkg/**/*.rb'

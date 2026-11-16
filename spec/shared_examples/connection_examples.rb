@@ -4,7 +4,7 @@ RSpec.shared_examples 'connection' do |verb|
   let(:http_verb) { verb }
 
   it 'correctly calls method on Faraday::Connection' do
-    args = [base_url + endpoint, request_body, request_headers]
+    args = [request_url, request_body, request_headers]
 
     if http_verb == :options
       faraday_method = 'run_request'
@@ -19,7 +19,7 @@ RSpec.shared_examples 'connection' do |verb|
   end
 
   it 'returns an instance of WS::HttpClient::Response' do
-    expect(call).to be_kind_of(WS::HttpClient::Response)
+    expect(call).to be_a(WS::HttpClient::Response)
   end
 
   it 'returns the correct response headers' do
@@ -31,7 +31,7 @@ RSpec.shared_examples 'connection' do |verb|
   end
 
   it 'returns content-type: application/json as Hash' do
-    expect(call.body).to be_kind_of(Hash)
+    expect(call.body).to be_a(Hash)
   end
 
   it 'returns the correct response body' do

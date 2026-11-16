@@ -1,0 +1,76 @@
+# GitHub copy of .gitlab-ci.yml. No build and no deploy.
+# A green run means every job below passed.
+#
+# Static analysis uses Ruby 4.0.6, matching image ruby:4.0.6-bookworm.
+# RSpec uses 3.3, 3.4, and 4.0.6, matching the bookworm matrix there.
+# ruby/setup-ruby is the Actions equivalent of those images.
+
+name: Gem checks
+
+on:
+  pull_request:
+  push:
+
+concurrency:
+  group: gem-checks-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TZ: Europe/Warsaw
+  BUNDLE_FROZEN: "1"
+
+jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ruby-setup
+        with:
+          ruby-version: "4.0.6"
+      - run: bundle exec rubocop
+
+  fasterer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ruby-setup
+        with:
+          ruby-version: "4.0.6"
+      - run: bundle exec fasterer
+
+  bundler_audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ruby-setup
+        with:
+          ruby-version: "4.0.6"
+      - run: bundle exec bundler-audit check --update
+
+  brakeman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ruby-setup
+        with:
+          ruby-version: "4.0.6"
+      - run: bundle exec brakeman --force-scan --quiet --no-pager --exit-on-warn --exit-on-error
+
+  rspec:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "3.3"
+          - "3.4"
+          - "4.0.6"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ruby-setup
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - run: bundle exec rspec

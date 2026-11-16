@@ -1,17 +1,11 @@
-require 'rubygems'
-require 'bundler/setup'
+# frozen_string_literal: true
 
-require 'rake/testtask'
+require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
 
-desc "Build a gem file"
-task :build do
-  system "gem build http_client.gemspec"
-end
+RSpec::Core::RakeTask.new(:spec)
 
-task :default => :spec
+RuboCop::RakeTask.new
 
-RSpec::Core::RakeTask.new(:spec) do |t|
-  t.ruby_opts = '-w'
-  t.rspec_opts = %w(--backtrace --color)
-end
+task default: %i[spec rubocop]
