@@ -2,6 +2,7 @@
 
 - Log request and response traces at debug. Without Rails, `VERBOSE=1` turns them on.
 - Load RuboCop Rake and RSpec cops.
+- Parse line coverage from the GitLab RSpec log so the coverage badge can show a percentage.
 
 ## [2.0.0] - 2026-11-16
 

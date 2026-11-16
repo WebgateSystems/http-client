@@ -86,3 +86,5 @@ rspec:
           - "4.0.6-bookworm"
   script:
     - bundle exec rspec
+  # simplecov-html 0.13 prints "Line Coverage: 100.0% (214 / 214)".
+  coverage: '/Line Coverage: (?<coverage>\d+\.\d+)%/'

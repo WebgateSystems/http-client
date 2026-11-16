@@ -1,5 +1,13 @@
 # HttpClient
 
+[![Ruby](https://img.shields.io/badge/Ruby-3.3%2B%20%7C%204.0-CC342D?logo=ruby&logoColor=white)](https://www.ruby-lang.org/)
+[![Faraday](https://img.shields.io/badge/Faraday-2.14%2B-b7121f)](https://lostisland.github.io/faraday/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
+[![pipeline](https://tracker.webgate.pro/wspublic/http-client/badges/main/pipeline.svg)](https://tracker.webgate.pro/wspublic/http-client/-/pipelines)
+[![coverage](https://tracker.webgate.pro/wspublic/http-client/badges/main/coverage.svg)](https://tracker.webgate.pro/wspublic/http-client/-/commits/main)
+
+---
+
 Thin wrapper around Faraday. It joins a base URL with a path, returns one response object, and raises its own errors for timeouts, connection failures, and unexpected statuses.
 
 ## Requirements
